@@ -1,9 +1,19 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import { Link } from 'react-router-dom';
+import { MdNavigateNext, MdNavigateBefore } from 'react-icons/md';
 import api from '../../services/github-api';
 import Container from '../../components/Container';
-import { Loading, Owner, IssueList } from './styles';
+import {
+  Loading,
+  Owner,
+  IssueList,
+  Select,
+  Pagination,
+  Back,
+  Foward,
+  Page,
+} from './styles';
 
 export default class Repository extends Component {
   static propTypes = {
@@ -18,19 +28,23 @@ export default class Repository extends Component {
     repository: {},
     issues: [],
     loading: true,
+    status: 'all',
+    page: 1,
   };
 
   async componentDidMount() {
     const { match } = this.props;
 
     const repoName = decodeURIComponent(match.params.repository);
+    const { status, page } = this.state;
 
     const [repository, issues] = await Promise.all([
       api.get(`/repos/${repoName}`),
       api.get(`/repos/${repoName}/issues`, {
         params: {
-          state: 'open',
+          state: status,
           per_page: 5,
+          page,
         },
       }),
     ]);
@@ -42,8 +56,32 @@ export default class Repository extends Component {
     });
   }
 
+  componentDidUpdate(_, prevState) {
+    const { issues } = this.state;
+
+    if (prevState.issues !== issues) {
+      this.componentDidMount();
+    }
+  }
+
+  // function cha(move) {
+  //   const { page } = await this.state;
+  //   this.setState({ page: page + move });
+  // };
+
+  changePage = async move => {
+    const { page } = await this.state;
+    this.setState({ page: page + move });
+  };
+
+  repositoryFilter = async e => {
+    const status = await e.target.value;
+
+    this.setState({ status });
+  };
+
   render() {
-    const { repository, issues, loading } = this.state;
+    const { repository, issues, loading, page } = this.state;
 
     if (loading) {
       return <Loading>Loading</Loading>;
@@ -58,6 +96,11 @@ export default class Repository extends Component {
         </Owner>
 
         <IssueList>
+          <Select defaultValue="all" onChange={this.repositoryFilter}>
+            <option value="all">Todos</option>
+            <option value="open">Aberto</option>
+            <option value="closed">Fechado</option>
+          </Select>
           {issues.map(issue => (
             <li key={String(issue.id)}>
               <img src={issue.user.avatar_url} alt={issue.user.login} />
@@ -73,6 +116,15 @@ export default class Repository extends Component {
             </li>
           ))}
         </IssueList>
+        <Pagination>
+          <Back page={page} onClick={() => this.changePage(-1)}>
+            <MdNavigateBefore color="#000000" size={14} />
+          </Back>
+          <Page>{page}</Page>
+          <Foward onClick={() => this.changePage(1)}>
+            <MdNavigateNext color="#000000" size={14} />
+          </Foward>
+        </Pagination>
       </Container>
     );
   }

@@ -101,3 +101,58 @@ export const IssueList = styled.ul`
     color: #999;
   }
 `;
+
+export const Select = styled.select`
+  background: white;
+  padding-left: 15px;
+  margin-bottom: 10px;
+  option {
+    color: black;
+    display: flex;
+    white-space: pre;
+    font-size: 12px;
+    font-weight: 600;
+    color: #333;
+  }
+`;
+
+export const Pagination = styled.div`
+  display: flex;
+  flex: 1;
+  align-items: center;
+  justify-content: center;
+
+  button {
+    border-radius: 24px;
+    border: 1px solid black;
+
+    margin: 2px;
+  }
+`;
+
+export const Page = styled.div`
+  height: 35px;
+  width: 35px;
+  border-radius: 24px;
+  border: 1px solid black;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+`;
+
+export const Back = styled.button.attrs(props => ({
+  disabled: parseInt(props.page, 10) === 1,
+}))`
+  height: 35px;
+  width: 35px;
+
+  &[disabled] {
+    cursor: not-allowed;
+    opacity: 0.6;
+  }
+`;
+
+export const Foward = styled.button`
+  height: 35px;
+  width: 35px;
+`;
